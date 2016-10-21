@@ -3,31 +3,86 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Code Contas</title>
+	<style type="text/css">
+		.pago{
+			color: forestgreen;
+		}
+		.naopago{
+			color: red;
+		}
+
+		.semconta{
+			color: darkgray;
+		}
+
+		.minhaclasse{
+			background-color: antiquewhite;
+		}
+
+	</style>
 </head>
 <body id="app">
 <h1>{{title}}</h1>
-<h3>{{ status }}</h3>
+<h3  :class="{'semconta': statusColor == 0, 'pago': statusColor == 1, 'naopago': statusColor == 2}">{{ status }}</h3>
+<nav>
+	<ul>
+		<li v-for="o in menus">
+			<a href="#" @click.prevent="showView(o.id)">{{ o.name }}</a>
+		</li>
+	</ul>
+</nav>
 
-<table border="1" cellpadding="10">
-	<thead>
-	<tr>
-		<th>#</th>
-		<th>Vendimento</th>
-		<th>Nome</th>
-		<th>Valor</th>
-		<th>Paga?</th>
-	</tr>
-	</thead>
-	<tbody>
+<div v-if="activedView == 0">
+	<table border="1" cellpadding="10">
+		<thead>
+		<tr>
+			<th>#</th>
+			<th>Vendimento</th>
+			<th>Nome</th>
+			<th>Valor</th>
+			<th>Paga?</th>
+			<th>Acoes</th>
+		</tr>
+		</thead>
+		<tbody>
 		<tr v-for="(index,o) in bills">
 			<td>{{ index }}</td>
 			<td>{{ o.date_due }}</td>
 			<td>{{ o.name }}</td>
-			<td>{{ o.value }}</td>
-			<td>{{ o.done }}</td>
+			<td>{{ o.value | currency 'R$ ' 2 }}</td>
+			<td class="minhaclasse" :class="{'pago': o.done, 'naopago': !o.done}">
+				{{ o.done | doneLabel}}
+			</td>
+			<td>
+				<a href="#" @click.prevent="loadBill(o)">Editar</a> | <a href="#" @click.prevent="removeBill(o)">Excluir</a>
+			</td>
 		</tr>
-	</tbody>
-</table>
+		</tbody>
+	</table>
+</div>
+
+<div v-if="activedView == 1">
+	<form name="form" @submit.prevent="submit">
+		<label>Vendimento:</label>
+		<input type="text" v-model="bill.date_due"><br><br>
+		<label>Nome:</label>
+
+		<select v-model="bill.name">
+			<option v-for="o in names" :value="{{ o }}">{{ o }}</option>
+		</select><br><br>
+
+		<label>Valor:</label>
+		<input type="text" v-model="bill.value"><br><br>
+
+		<label>Situação: </label>
+		<input type="checkbox" id="checkbox" v-model="bill.done">
+
+		<label for="checkbox">{{ bill.done | doneLabel }}</label>
+		<br><br>
+		<input type="submit" value="Enviar">
+
+	</form>
+</div>
 
 
 <script type="text/javascript" src="node_modules/vue/dist/vue.min.js"></script>
